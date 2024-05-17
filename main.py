@@ -37,7 +37,7 @@ def main(args):
     cfg_filename = os.path.basename(args.config).replace('.yaml', '')
     if len(args.output) == 0:
         ckpt_folder = os.path.join(
-            cfg['output_folder'], cfg_filename) # debug的时候，没指定output，直接用文件名做目录
+            cfg['output_folder'], cfg_filename) 
         # ts = datetime.datetime.fromtimestamp(int(time.time()))
         # ckpt_folder = os.path.join(
         #     cfg['output_folder'], cfg_filename + '_' + str(ts).replace(" ", "_"))
