@@ -1,0 +1,84 @@
+dataset_name: breakfast
+train_split: ['train', '1']
+val_split: ['test', '1']
+dataset: {
+  anno_dir: ./data/breakfast/splits,
+  feat_folder: ./data/breakfast/features,
+  gt_dir: ./data/breakfast/groundTruth,
+  mapping_file: ./data/breakfast/mapping.txt,
+  file_prefix: ~,
+  file_ext: .npy,
+  num_classes: 48,
+  input_dim: 2048,
+  feat_stride: 1,
+  num_frames: 0, 
+  fps: 15.0,
+  # serve as data augmentation
+  trunc_thresh: 0.0,
+  crop_ratio: , #[0.9, 1.0]
+  max_seq_len: 15360,
+  scale_ratio: [0.5, 1.5],
+  scale_prob: 0.8,
+}
+
+model_name: MaskPointTransformer
+model: {
+  fpn_type: fpn,
+  decoder_type: transformer,
+  max_buffer_len_factor: 6.0,
+  n_mha_win_size: 25,
+  # regression_range: [[0, 4], [4, 8], [8, 16], [16, 32]],
+  # backbone_arch: [2, 2, 3],
+  # embd_dim: 128,
+  # fpn_dim: 128,
+  # head_dim: 128,
+  use_rel_pe: True,
+  use_abs_pe: True,
+  n_dec_layers: 1,
+  n_blocks: 3,
+  conv_dila: [[2,4],[4,8],[8,16,32,64,128]],
+  frame_cls_loss: False,
+  frame_mask_loss: False,
+  action_cls_loss: True,
+  action_mask_loss: True,
+  tmse_loss: False,
+  boundary_loss: True,
+  with_aux_outputs: True,
+  with_query_pos: True,
+  with_feat_pos: True,
+  boundary_len: 10,
+  boundary_sigma: 6,
+  with_aux_boundary: True, 
+  normalize_before: True,
+  with_action: True,
+}
+opt: {
+  learning_rate: 0.0001, 
+  epochs: 20,
+  weight_decay: 0.05,
+}
+loader: {
+  batch_size: 4,
+}
+train_cfg: {
+  init_loss_norm: 100,
+  clip_grad_l2norm: 1.0,
+  cls_prior_prob: 0.01,
+  center_sample: none, #radius,
+  center_sample_radius: 1.5,
+  dropout: 0.,
+  droppath: 0.,
+  decoder_dropout: 0.,
+  decoder_droppath: 0.,
+}
+test_cfg: {
+  voting_thresh: 0.7,
+  pre_nms_topk: 2000,
+  max_seg_num: 200,
+  min_score: 0.001,
+  multiclass_nms: True,
+}
+
+overlaps: [0.1, 0.25, 0.5]
+
+output_folder: ./ckpt/breakfast
