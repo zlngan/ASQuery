@@ -259,7 +259,6 @@ class SelfAttentionLayer(nn.Module):
             if p.dim() > 1:
                 nn.init.xavier_uniform_(p)
     def with_pos_embed(self, tensor, pos=None):
-        # 考虑dn情况
         pos_len = pos.shape[-1]
         if pos is None:
             return tensor
