@@ -81,12 +81,12 @@ class PtTransformerClsHead(nn.Module):
 
         # apply the classifier for each pyramid level
         out_logits = tuple()
-        for _, (cur_feat, cur_mask) in enumerate(zip(fpn_feats, fpn_masks)): # 这些head对于所有level是共享的
+        for _, (cur_feat, cur_mask) in enumerate(zip(fpn_feats, fpn_masks)): 
             cur_out = cur_feat
-            for idx in range(len(self.head)): # 经过两层1d cnn
+            for idx in range(len(self.head)): 
                 cur_out, _ = self.head[idx](cur_out, cur_mask)
                 cur_out = self.act(self.norm[idx](cur_out))
-            cur_logits, _ = self.cls_head(cur_out, cur_mask) # 经过一层1d cnn，channel变成类别数 [2,20,2304]
+            cur_logits, _ = self.cls_head(cur_out, cur_mask) 
             cur_logits = self.norm[-1](cur_logits)
             out_logits += (cur_logits, )
 
@@ -158,7 +158,7 @@ class PtTransformerRegHead(nn.Module):
                 cur_out, _ = self.head[idx](cur_out, cur_mask)
                 cur_out = self.act(self.norm[idx](cur_out))
             cur_offsets, _ = self.offset_head(cur_out, cur_mask)
-            out_offsets += (F.relu(self.scale[l](cur_offsets)), ) # 最后会经过scale（不过这里是1），然后再经过relu
+            out_offsets += (F.relu(self.scale[l](cur_offsets)), ) 
 
         # fpn_masks remains the same
         return out_offsets
@@ -358,14 +358,14 @@ class PtTransformer(nn.Module):
         batched_inputs, batched_masks = self.preprocessing(video_list)
 
         # forward the network (backbone -> neck -> heads)
-        feats, masks = self.backbone(batched_inputs, batched_masks) # 得到6个特征
-        fpn_feats, fpn_masks = self.neck(feats, masks) # 这里仅仅是把每个特征进行了一下larernorm
+        feats, masks = self.backbone(batched_inputs, batched_masks) 
+        fpn_feats, fpn_masks = self.neck(feats, masks) 
 
         # compute the point coordinate along the FPN
         # this is used for computing the GT or decode the final results
         # points: List[T x 4] with length = # fpn levels
         # (shared across all samples in the mini-batch)
-        points = self.point_generator(fpn_feats) # 分别得到各个尺度下的label
+        points = self.point_generator(fpn_feats) 
 
         # out_cls: List[B, #cls + 1, T_i]
         out_cls_logits = self.cls_head(fpn_feats, fpn_masks)
@@ -421,7 +421,7 @@ class PtTransformer(nn.Module):
         if self.training:
             assert max_len <= self.max_seq_len, "Input length must be smaller than max_seq_len during training"
             # set max_len to self.max_seq_len
-            max_len = self.max_seq_len # 训练的话，还是让最大长度固定
+            max_len = self.max_seq_len 
             # batch input shape B, C, T
             batch_shape = [len(feats), feats[0].shape[0], max_len]
             batched_inputs = feats[0].new_full(batch_shape, padding_val)
@@ -441,7 +441,7 @@ class PtTransformer(nn.Module):
                 feats[0], padding_size, value=padding_val).unsqueeze(0)
 
         # generate the mask
-        batched_masks = torch.arange(max_len)[None, :] < feats_lens[:, None] # 这种得到mask的方式简单直接
+        batched_masks = torch.arange(max_len)[None, :] < feats_lens[:, None] 
 
         # push to device
         batched_inputs = batched_inputs.to(self.device) # [2, 2048, 2304]
@@ -515,7 +515,7 @@ class PtTransformer(nn.Module):
             center_seg = torch.stack( # [4536,4,2]
                 (cb_dist_left, cb_dist_right), -1)
             # F T x N
-            inside_gt_seg_mask = center_seg.min(-1)[0] > 0 # 直接把动作中间区域的帧取出来了[L, 5]
+            inside_gt_seg_mask = center_seg.min(-1)[0] > 0 
         else:
             # inside an gt action
             inside_gt_seg_mask = reg_targets.min(-1)[0] > 0
@@ -523,7 +523,7 @@ class PtTransformer(nn.Module):
         # limit the regression range for each location
         max_regress_distance = reg_targets.max(-1)[0]
         # F T x N
-        inside_regress_range = torch.logical_and( #最大的回归距离应该在range范围内
+        inside_regress_range = torch.logical_and( 
             (max_regress_distance >= concat_points[:, 1, None]),
             (max_regress_distance <= concat_points[:, 2, None])
         )
@@ -535,7 +535,6 @@ class PtTransformer(nn.Module):
         # F T x N -> F T
         min_len, min_len_inds = lens.min(dim=1)
 
-        # corner case: multiple actions with very similar durations (e.g., THUMOS14)
         min_len_mask = torch.logical_and(
             (lens <= (min_len[:, None] + 1e-3)), (lens < float('inf'))
         ).to(reg_targets.dtype)
