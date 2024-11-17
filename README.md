@@ -43,7 +43,5 @@ tensorboard --logdir=./ckpt/breakfast/config_result/logs
 ```shell
 python eval.py configs/breakfast/config.yaml ckpt/breakfast/config_result
 ```
-## Training and Evaluating Assembly101
-Work in progress. Stay tuned.
 ## Acknowledgement
 [ActionFormer](https://github.com/happyharrycn/actionformer_release): The main codebase we built upon and it is an wonderful model.
