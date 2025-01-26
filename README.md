@@ -1,6 +1,6 @@
 # ASQuery: A Query-Based Model For Action Segmentation
 ## Introduction
-This repository provides a PyTorch implementation of the paper "ASQuery: A Query-Based Model For Action Segmentation". It should be noted that the current version of the code has some redundancy. A cleaned-up version of the code will be released later.
+This repository provides a PyTorch implementation of the paper "ASQuery: A Query-Based Model For Action Segmentation". 
 
 <div align="center">
   <img src="framework.png" width="600px"/>
